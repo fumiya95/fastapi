@@ -5,7 +5,9 @@ from typing import Annotated, Optional
 from sqlalchemy.orm import Session
 from models import Todos
 
-router = APIRouter()
+router = APIRouter( prefix='/todo',
+
+  tags=['todo'])
 
 # main.pyから機能を移植
 db_dependency = Annotated[Session, Depends(get_db)]
@@ -27,7 +29,7 @@ async def read_todo(db: db_dependency,todo_id:int=Path(gt=0)):
         return todo_model
     raise HTTPException(status_code=404, detail="todo not found")
 
-@router.post("/todo", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_todo(db: db_dependency, todo_request: TodoRequest):
     # 新しい TODO を作成する
     todo_model = Todos(**todo_request.dict())
@@ -35,7 +37,7 @@ async def create_todo(db: db_dependency, todo_request: TodoRequest):
     db.commit()
 
 
-@router.put("/todo/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_todo(
     db: db_dependency,
     todo_request: TodoRequest,
@@ -51,7 +53,7 @@ async def update_todo(
    db.add(todo_model)
    db.commit()
 
-@router.delete("/todo/{todo_id}",status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{todo_id}",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo(db: db_dependency,todo_id: int = Path(gt=0)):
    todo_model=db.query(Todos).filter(Todos.id == todo_id).first()
    if todo_model is None:
